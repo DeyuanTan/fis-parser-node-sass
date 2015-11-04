@@ -9,6 +9,8 @@
 var path = require('path');
 var sass = require('node-sass');
 var util = require('util');
+var rework = require('rework');
+var sass_images = require('rework-sass-images');
 var root;
 
 function resolve_and_load(filename, dir) {
@@ -218,8 +220,13 @@ module.exports = function(content, file, conf){
         file.extras.derived = file.extras.derived || [];
         file.extras.derived.push(mapping);
     }
-
-    return ret.css.toString('utf8');
+    // 增加image-width，image-height,image-size处理
+    var csscontent = ret.css.toString('utf8');
+	var _imgpath = file.realpath.replace(file.basename,'');
+	csscontent = rework(csscontent)
+		  .use(sass_images(_imgpath))
+		  .toString();
+    return csscontent;
 };
 
 module.exports.defaultOptions = {
